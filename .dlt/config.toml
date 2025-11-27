@@ -1,3 +1,42 @@
 [runtime]
 log_level="WARNING"  # the system log level of dlt
 dlthub_telemetry = false
+
+# Normalize configuration - prevent splitting nested data into separate tables
+[normalize.data_writer]
+disable_compression = false
+
+[normalize]
+max_table_nesting = 0  # Keep all nested data in the main table
+
+# Filesystem staging configuration for Athena
+[destination.filesystem]
+layout = "{table_name}/{load_id}.{file_id}.{ext}"
+
+# Athena destination will use filesystem as staging
+
+# Athena destination configuration for Iceberg partitioning
+[destination.athena]
+# Force table replacement to apply new partition specification
+force_iceberg_table_recreation = true
+
+[destination.athena.table_params.daily_statistics]
+# Specify partition columns for Iceberg table
+partition_by = ["study_id", "ingestion_date"]
+
+# Actigraph CentrePoint API Configuration
+# These are non-sensitive configuration values
+# DLT looks for config under sources.<source_name>.<function_name>
+
+[sources.actigraph_source.actigraph]
+# Study and Subject Configuration
+# Update these values based on your Actigraph study
+study_id = 1222  # Replace with your Study ID
+subject_id = 122566  # Replace with your Subject ID
+
+# Date range for daily statistics
+from_date = "2025-01-01"  # ISO8601 format (YYYY-MM-DD)
+to_date = "2025-10-31"    # ISO8601 format (YYYY-MM-DD)
+
+# Optional: Daily Statistics Setting ID (GUID)
+# daily_statistics_setting_id = "ad1fda37-239d-48ad-581b-08d8556c9944"
