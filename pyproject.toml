@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.39.11",
-    "dlt[athena,deltalake,parquet]>=1.15.0",
+    "dlt[athena,deltalake,parquet,snowflake]>=1.15.0",
     "pandas>=2.3.2",
     "python-dotenv>=1.1.1",
     "requests>=2.32.0",

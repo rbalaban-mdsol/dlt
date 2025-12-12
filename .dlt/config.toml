@@ -9,20 +9,13 @@ disable_compression = false
 [normalize]
 max_table_nesting = 0  # Keep all nested data in the main table
 
-# Filesystem staging configuration for Athena
-[destination.filesystem]
-layout = "{table_name}/{load_id}.{file_id}.{ext}"
-
-# Athena destination will use filesystem as staging
-
-# Athena destination configuration for Iceberg partitioning
-[destination.athena]
-# Force table replacement to apply new partition specification
-force_iceberg_table_recreation = true
-
-[destination.athena.table_params.daily_statistics]
-# Specify partition columns for Iceberg table
-partition_by = ["study_id", "ingestion_date"]
+# Snowflake destination configuration
+[destination.snowflake]
+enable_dataset_name_normalization = false  # Keep SENSORCLOUD as-is
+# Don't try to alter existing Iceberg tables
+create_indexes = false
+# Skip schema evolution for existing Iceberg tables
+should_update_tables = false
 
 # Actigraph CentrePoint API Configuration
 # These are non-sensitive configuration values
@@ -35,8 +28,8 @@ study_id = 1222  # Replace with your Study ID
 subject_id = 122566  # Replace with your Subject ID
 
 # Date range for daily statistics
-from_date = "2025-01-01"  # ISO8601 format (YYYY-MM-DD)
-to_date = "2025-10-31"    # ISO8601 format (YYYY-MM-DD)
+from_date = "2024-01-01"  # ISO8601 format (YYYY-MM-DD)
+to_date = "2025-01-01"    # ISO8601 format (YYYY-MM-DD)
 
 # Optional: Daily Statistics Setting ID (GUID)
 # daily_statistics_setting_id = "ad1fda37-239d-48ad-581b-08d8556c9944"

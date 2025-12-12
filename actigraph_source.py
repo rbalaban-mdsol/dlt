@@ -98,6 +98,7 @@ def actigraph_source(
     from_date: str = dlt.config.value,
     to_date: str = dlt.config.value,
     daily_statistics_setting_id: str = None,
+    refresh: bool = False,
 ):
     """
     DLT source for Actigraph CentrePoint API.
@@ -105,15 +106,22 @@ def actigraph_source(
     This source fetches daily statistics data from the Actigraph CentrePoint API
     using OAuth2 client credentials authentication with incremental loading.
     
+    Incremental loading tracks the maximum lastEpochDateTimeUtc value and only
+    fetches records with greater values on subsequent runs.
+    
+    WARNING: If the API mutates existing records with lastEpochDateTimeUtc values
+    that decrease, those updates will be missed. Use refresh=True to reload all data.
+    
     Args:
         study_id: CentrePoint Study ID
         subject_id: CentrePoint Subject ID
         from_date: Starting date for the daily statistics query (ISO8601 format)
         to_date: Ending date for the daily statistics query (ISO8601 format)
         daily_statistics_setting_id: Optional GUID of the settings used to create the daily statistics
+        refresh: If True, disables incremental loading and fetches all data
     
     Yields:
-        DLT resources containing daily statistics data with partitioning columns
+        DLT resources containing daily statistics data
     """
     
     # Build query parameters
@@ -126,14 +134,27 @@ def actigraph_source(
         params["dailyStatisticsSettingId"] = daily_statistics_setting_id
     
     # Configure the REST API source
+    # Build endpoint config - conditionally include incremental based on refresh flag
+    endpoint_config = {
+        "path": f"analytics/v3/Studies/{study_id}/Subjects/{subject_id}/DailyStatistics",
+        "data_selector": "items",
+    }
+    
+    # Add incremental loading unless refresh mode is enabled
+    if not refresh:
+        endpoint_config["incremental"] = {
+            "cursor_path": "lastEpochDateTimeUtc",
+            "initial_value": "1970-01-01T00:00:00Z",  # ISO datetime string to match API data type
+        }
+    
     config = {
         "client": {
             "base_url": "https://api.actigraphcorp.com/",
             "auth": actigraph_auth(),
         },
         "resource_defaults": {
-            "primary_key": "id",
-            "write_disposition": "merge",
+            # No primary key - we're just storing raw data
+            "write_disposition": "append",  # Just `append` raw data, no merge/dedup
             "endpoint": {
                 "params": params,
             }
@@ -141,14 +162,7 @@ def actigraph_source(
         "resources": [
             {
                 "name": "daily_statistics",
-                "endpoint": {
-                    "path": f"analytics/v3/Studies/{study_id}/Subjects/{subject_id}/DailyStatistics",
-                    "data_selector": "items",
-                    "incremental": {
-                        "cursor_path": "lastEpochDateTimeUtc",
-                        "initial_value": "1970-01-01T00:00:00Z",  # ISO datetime string to match API data type
-                    }
-                },
+                "endpoint": endpoint_config,
                 "max_table_nesting": 0,  # Keep all nested data in main table
             }
         ],
@@ -157,25 +171,9 @@ def actigraph_source(
     # Get the REST API source
     source = rest_api_source(config)
     
-    # Function to add partition columns to each record
-    def add_partition_columns(item):
-        """
-        Add partition columns to each record.
-        
-        This function adds:
-        - study_id: For partitioning by study
-        - ingestion_date: For partitioning by ingestion date
-        """
-        from datetime import datetime
-        
-        item["study_id"] = study_id
-        item["ingestion_date"] = datetime.utcnow().date().isoformat()
-        return item
-    
-    # Apply the mapping function
-    resource = source.daily_statistics.add_map(add_partition_columns)
-    
-    return resource
+    # Return raw data without modifications
+    # Note: Partition columns (study_id, ingestion_date) are added via file layout in config
+    return source.daily_statistics
 
 
 def load_daily_statistics(

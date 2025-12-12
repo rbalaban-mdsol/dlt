@@ -21,11 +21,11 @@ def main(refresh: bool = False):
     print("\n--- Starting Actigraph Data Pipeline ---")
     
     # Create the DLT pipeline
-    # Using Athena destination with Iceberg format for native partition support
+    # Using Snowflake destination to write to existing Iceberg table
     pipeline = dlt.pipeline(
         pipeline_name="actigraph_pipeline",
-        destination="athena",
-        dataset_name="actigraph_data",
+        destination="snowflake",
+        dataset_name="SENSORCLOUD",  # Snowflake schema name
     )
     
     # Load configuration from .dlt/config.toml for display
@@ -41,23 +41,10 @@ def main(refresh: bool = False):
     print(f"  Date Range: {from_date} to {to_date}")
     print(f"  Refresh Mode: {refresh}")
     
-    # Create the source - DLT will automatically inject config values
-    # No need to pass parameters explicitly  
-    source = actigraph_source()
-    
-    # Reset incremental state if refresh mode is enabled
-    if refresh:
-        print("\n⚠️  Refresh mode enabled - ignoring incremental state")
-        source.daily_statistics.apply_hints(incremental=dlt.sources.incremental(cursor_path="lastEpochDateTimeUtc", initial_value="1970-01-01T00:00:00Z"))
-    
-    # Apply partition hints for the resource
-    source.daily_statistics.apply_hints(
-        write_disposition="append",
-        columns={
-            "study_id": {"partition": True},
-            "ingestion_date": {"partition": True}
-        }
-    )
+    # Create the source - refresh parameter is deprecated but kept for compatibility
+    # Incremental loading is now always disabled due to mutable data
+    source = actigraph_source(refresh=refresh)
+
     
     # Run the pipeline
     print("\nRunning pipeline to load data from Actigraph API...")
@@ -74,8 +61,9 @@ def main(refresh: bool = False):
             print(f"Failed job: {job.job_file_info.job_id()}")
     else:
         print("\n Pipeline completed successfully!")
-        print(f"\n Data loaded to S3 bronze layer: s3://msc-sandbox-iceberg/bronze/actigraph_data")
-        print(f"Table created: daily_statistics")
+        print(f"\n Data loaded to Snowflake Iceberg table")
+        print(f"Table: DATA_CONNECT_SANDBOX_DB.SENSORCLOUD.daily_statistics")
+        print(f"Location: s3://sensorcloud-lakehouse-sandbox/daily_statistics.ZpG8Ei6f/")
     
     print("\n--- Actigraph Data Pipeline Complete ---")
 
