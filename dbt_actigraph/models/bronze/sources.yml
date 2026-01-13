@@ -1,0 +1,61 @@
+version: 2
+
+sources:
+  - name: actigraph_bronze
+    description: "Bronze layer data from Actigraph CentrePoint API ingested via DLT pipeline"
+    database: DATA_CONNECT_SANDBOX_DB
+    schema: SENSORCLOUD
+    tables:
+      - name: daily_statistics
+        description: "Raw daily statistics from Actigraph API with DLT metadata columns"
+        columns:
+          - name: id
+            description: "Primary identifier"
+            tests:
+              - not_null
+          - name: study_id
+            description: "Study identifier"
+          - name: daily_statistics_setting_id
+            description: "Settings identifier for daily statistics"
+          - name: subject_id
+            description: "Subject identifier"
+            tests:
+              - not_null
+          - name: date
+            description: "Date of the statistics"
+            tests:
+              - not_null
+          - name: site_id
+            description: "Site identifier"
+          - name: activity_monitor_serials
+            description: "Activity monitor serial numbers (JSON)"
+          - name: epoch_aggregation
+            description: "Epoch aggregation data (JSON)"
+          - name: event_marker_aggregation
+            description: "Event marker aggregation data (JSON)"
+          - name: crouter_aggregations
+            description: "Crouter aggregations data (JSON)"
+          - name: freedson_aggregations
+            description: "Freedson aggregations data (JSON)"
+          - name: staudenmayer_aggregations
+            description: "Staudenmayer aggregations data (JSON)"
+          - name: evenson_aggregations
+            description: "Evenson aggregations data (JSON)"
+          - name: mavm_aggregation
+            description: "MAVM aggregation data (JSON)"
+          - name: hildebrand_met_calorie_aggregation
+            description: "Hildebrand MET calorie aggregation data (JSON)"
+          - name: first_epoch_date_time_utc
+            description: "First epoch timestamp in UTC"
+          - name: last_epoch_date_time_utc
+            description: "Last epoch timestamp in UTC"
+          - name: first_epoch_date_time_local
+            description: "First epoch timestamp in local time"
+          - name: last_epoch_date_time_local
+            description: "Last epoch timestamp in local time"
+          - name: ingestion_date
+            description: "DLT ingestion date"
+          - name: _dlt_load_id
+            description: "DLT load identifier"
+          - name: _dlt_id
+            description: "DLT unique row identifier"

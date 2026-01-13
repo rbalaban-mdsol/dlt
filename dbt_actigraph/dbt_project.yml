@@ -1,0 +1,39 @@
+name: 'actigraph_transformations'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'actigraph_snowflake'
+
+# These configurations specify where dbt should look for different types of files.
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Configuring models
+models:
+  actigraph_transformations:
+    # Config for bronze layer (source definitions)
+    bronze:
+      +materialized: view
+    
+    # Config for silver layer (transformations)
+    silver:
+      +materialized: table
+      +table_type: iceberg
+      +external_volume: SENSORCLOUD_LAKEHOUSE_VOLUME_SANDBOX
+
+# Global configurations
+vars:
+  # Database and schema names
+  bronze_database: DATA_CONNECT_SANDBOX_DB
+  bronze_schema: SENSORCLOUD
+  silver_database: DATA_CONNECT_SANDBOX_DB
+  silver_schema: SENSORCLOUD

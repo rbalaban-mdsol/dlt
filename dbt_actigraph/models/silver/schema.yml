@@ -1,0 +1,96 @@
+version: 2
+
+models:
+  - name: observation_components
+    description: "Silver layer FHIR-compliant observation components derived from Actigraph daily statistics"
+    config:
+      tags: ['silver', 'fhir', 'actigraph']
+    
+    columns:
+      - name: observation_id
+        description: "Unique deterministic identifier for each observation"
+        tests:
+          - not_null
+          - unique
+      
+      - name: effective_datetime
+        description: "The datetime when the observation was effective"
+        tests:
+          - not_null
+      
+      - name: effective_period_start
+        description: "Start of the observation period (00:00:00.000)"
+        tests:
+          - not_null
+      
+      - name: effective_period_end
+        description: "End of the observation period (23:59:59.999)"
+        tests:
+          - not_null
+      
+      - name: subject
+        description: "FHIR subject reference (Patient)"
+        tests:
+          - not_null
+      
+      - name: device
+        description: "FHIR device reference"
+        tests:
+          - not_null
+      
+      - name: study_environment
+        description: "Platform study environment reference"
+      
+      - name: status
+        description: "FHIR observation status (e.g., 'final')"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['registered', 'preliminary', 'final', 'amended', 'corrected', 'cancelled', 'entered-in-error', 'unknown']
+      
+      - name: code
+        description: "FHIR code object describing the type of observation"
+        tests:
+          - not_null
+      
+      - name: category
+        description: "FHIR category object (device category)"
+        tests:
+          - not_null
+      
+      - name: partOf
+        description: "FHIR partOf references array (placeholder)"
+      
+      - name: derivedFrom
+        description: "FHIR derivedFrom references array (placeholder)"
+      
+      - name: body_site
+        description: "FHIR body site object (placeholder)"
+      
+      - name: interpretation
+        description: "FHIR interpretation array (placeholder)"
+      
+      - name: metadata
+        description: "Transformation metadata including processing timestamp and job info"
+        tests:
+          - not_null
+      
+      - name: bronze_id
+        description: "Reference to bronze layer record ID"
+      
+      - name: study_id
+        description: "Study identifier from bronze layer"
+      
+      - name: subject_id
+        description: "Subject identifier from bronze layer"
+        tests:
+          - not_null
+      
+      - name: site_id
+        description: "Site identifier from bronze layer"
+      
+      - name: _dlt_load_id
+        description: "DLT load identifier for traceability"
+      
+      - name: _dlt_id
+        description: "DLT unique row identifier for traceability"

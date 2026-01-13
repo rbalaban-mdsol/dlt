@@ -1,0 +1,10 @@
+target/
+dbt_packages/
+logs/
+.user.yml
+*.pyc
+__pycache__/
+.DS_Store
+*.pem
+.snowflake_private_key.pem
+profiles.yml
