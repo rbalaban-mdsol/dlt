@@ -17,19 +17,14 @@ create_indexes = false
 # Skip schema evolution for existing Iceberg tables
 should_update_tables = false
 
-# Actigraph CentrePoint API Configuration
+# S3 Actigraph Data Configuration
 # These are non-sensitive configuration values
 # DLT looks for config under sources.<source_name>.<function_name>
 
-[sources.actigraph_source.actigraph]
-# Study and Subject Configuration
-# Update these values based on your Actigraph study
-study_id = 1222  # Replace with your Study ID
-subject_id = 122566  # Replace with your Subject ID
+[sources.s3_actigraph_source.s3_actigraph]
+# S3 bucket URL - change this based on what data you want to load
+# For daily statistics:
+bucket_url = "s3://sensorcloud-pollers-sandbox/test/actigraph/daily_statistics/"
+# For accelerometer data (old):
+# bucket_url = "s3://sensorcloud-pollers-sandbox/fully_optimzed/actigraph/raw_accelerometer/4e4ed6cc-b891-4b08-953c-1cb68c2e0733/1222/101053eb-4c72-4584-a10f-715aa7148810/130295/"
 
-# Date range for daily statistics
-from_date = "2024-01-01"  # ISO8601 format (YYYY-MM-DD)
-to_date = "2025-01-01"    # ISO8601 format (YYYY-MM-DD)
-
-# Optional: Daily Statistics Setting ID (GUID)
-# daily_statistics_setting_id = "ad1fda37-239d-48ad-581b-08d8556c9944"
